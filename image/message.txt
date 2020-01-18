@@ -1,0 +1,126 @@
+var cvs = document.getElementById("canvas");
+cvs.width = window.innerWidth;
+cvs.height = window.innerHeight;
+
+
+var ctx = cvs.getContext("2d");
+var bird = new Image();
+var bg = new Image();
+var fg = new Image();
+var pipeUp = new Image();
+var pipeBottom = new Image();
+
+bird.src = "img/bird.png";
+bg.src = "img/bg.png";
+fg.src = "img/fg.png";
+pipeUp.src = "img/pipeUp.png";
+pipeBottom.src = "img/pipeBottom.png";
+
+// Звуковые файлы
+var fly = new Audio();
+var score_audio = new Audio();
+
+fly.src = "audio/fly.mp3";
+score_audio.src = "audio/score.mp3";
+var yfg =  cvs.height - fg.height
+var gap = 90;
+var space = 200
+// При нажатии на какую-либо кнопку
+document.addEventListener("keydown", moveUp);
+
+function moveUp() {
+	yPos -= 25;
+	fly.play();
+}
+
+// Создание блоков
+
+var pipe = [];
+indent = bg.height - space;
+gapPoint = Math.floor(Math.random() * indent)- indent;
+pipe[0] = {
+	x : cvs.width,
+	y : 0 ,
+	pipeUpHeight :gapPoint,
+	yPipeBottom : gapPoint + gap ,
+	yPipeUp : 0 
+}
+
+var score = 0;
+// Позиция птички
+var xPos = 10;
+var yPos = 150;
+var grav = 1.5;
+
+
+function draw() {
+	     window1();
+
+	for(var i = 0; i < pipe.length; i++) {
+		ctx.drawImage(pipeUp, pipe[i].x, pipe[i].yPipeUp, pipeUp.width, pipe[i].pipeUpHeight );
+		ctx.drawImage(pipeBottom, pipe[i].x, pipe[i].yPipeBottom, pipeBottom.width, yfg  - pipe[i].pipeUpHeight - gap );
+		
+		pipe[i].x--;
+console.log("pipe[i].pipeUpHeight "+pipe[i].pipeUpHeight)
+console.log("yfg"+ yfg)
+alert(1)
+		if(pipe[i].x == 125) {
+			indent = bg.height - space
+			gapPoint = Math.floor(Math.random() * indent)- indent
+			pipe.push({
+				x : cvs.width,
+				yPipeBottom : gapPoint + gap ,
+				yPipeUp : 0 ,
+				pipeUpHeight :gapPoint,
+				y : Math.floor(Math.random() * pipeUp.height) - pipeUp.height
+			});
+		}	
+
+ // Отслеживание прикосновений
+	if(xPos + bird.width >= pipe[i].x
+	&& xPos <= pipe[i].x + pipeUp.width
+	&& (yPos <= pipe[i].y + pipeUp.height
+	|| yPos + bird.height >= pipe[i].y + pipeUp.height + gap) || yPos + bird.height >= cvs.height - fg.height) {
+	location.reload(); // Перезагрузка страницы
+	}
+
+		if(pipe[i].x == 5) {
+		score++;
+		score_audio.play();
+		}
+	}
+
+	ctx.drawImage(fg, 0, cvs.height - fg.height);
+	ctx.drawImage(bird, xPos, yPos);
+
+ yPos += grav;
+
+ ctx.fillStyle = "#000";
+ ctx.font = "24px Verdana";
+ ctx.fillText("Счет: " + score, 10, cvs.height - 20);
+
+ requestAnimationFrame(draw);
+}
+function window1(){
+	var bgHieght = window.innerHeight - fg.height
+	var imageWidth = Math.floor(window.innerWidth/bg.width);
+	var x1 = 0;
+	var x2 = 0;
+	for(i=0;i<=imageWidth;i++){
+		ctx.drawImage(bg, x1, 0 , bg.width,bgHieght );
+		x1+= bg.width
+	}
+	
+	var image2Wigth=Math.floor(window.innerWidth/fg.width);
+	var yfg =  cvs.height - fg.height;
+	
+		for (i=0;i<=image2Wigth;i++){
+			ctx.drawImage(fg,x2, yfg );
+			x2 += fg.width
+		} 
+}
+
+
+
+	
+pipeBottom.onload = draw;
